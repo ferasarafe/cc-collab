@@ -6,7 +6,7 @@ The skill text is [`skills/cc-collab/SKILL.md`](skills/cc-collab/SKILL.md) (v12.
 
 ## What it's good for
 
-Any task with a single deliverable the two agents can check: a code fix with tests, a plan, a spec, a review, a decision memo. One agent **codes/drafts**, the other **reviews**: applies the patch in its own worktree, reproduces RED/GREEN itself, runs the external reviewer you name (e.g. CodeRabbit), checks every caller, and posts defects only.
+Any task with a single deliverable the two agents can check: a code fix with tests, a plan, a spec, a review, a decision memo. One agent **codes/drafts**, the other **reviews**. For code, the reviewer applies the patch in its own worktree, reproduces RED/GREEN itself, runs the external reviewer you name (e.g. CodeRabbit), and checks every caller. For documents, the reviewer checks requirement coverage. Defects use `R#`; style suggestions use nonblocking `IDEA`.
 
 ## Install
 
@@ -47,7 +47,7 @@ Each agent writes **only its own file(s)**. Patch names are immutable (`v1`, `v2
 
    ```text
    Invoke the cc-collab skill. cc-collab in this folder. <one line: the deliverable and its final format>.
-   You are <Lead|reviewer>; ChatGPT <codes|drafts> in CHATGPT.md and work/. Turn 1: verify <Sentry, CodeRabbit, git, …> and write access (else SETUP BLOCKED), record the baseline SHA, ask me the OWNER questions in one batch, and start your independent re-investigation. Write only CLAUDE.md, TASK.md, DRAFT.md and work/claude-* receipts. Stay in-turn and poll CHATGPT.md every 60 s; no turn limit; continue until both accept the same hashes.
+   You are <Lead|reviewer>; ChatGPT <codes|drafts> in CHATGPT.md and work/. Turn 1: verify <Sentry, CodeRabbit, git, …> and write access (else SETUP BLOCKED), record the baseline SHA, ask me the OWNER questions in one batch, and start your independent re-investigation. Write only CLAUDE.md, TASK.md, DRAFT.md, work/claude-* receipts, your authorized scratch worktree/evidence under work/scratch/, and the final output if TASK designates you as its writer. Stay in-turn and poll CHATGPT.md every 60 s; no turn limit; continue until both accept the same hashes.
    ```
 
    Claude writes `TASK.md`, posts `CLAUDE.md` T1 and prints the **startup line** for the other agent.
@@ -58,7 +58,7 @@ Each agent writes **only its own file(s)**. Patch names are immutable (`v1`, `v2
    cc-collab in <FOLDER>. Read TASK.md fully. You are an equal collaborator; <writing/research scope>. Verify required capabilities. Write only CHATGPT.md and authorized work/ files. T1: MONITOR (verified). First peer check after two minutes; thereafter every minute while active.
    ```
 
-4. Answer any `OWNER Qn` lines in whichever chat you're in. Each carries a default and a trigger, so the run doesn't stall on you — but silence never grants a permission (push, publish, send, spend).
+4. Answer any `OWNER Qn` lines in whichever chat you're in. Optional questions carry a default and a trigger within existing authorization. Required decisions can block the run; silence never grants a permission (push, publish, send, spend).
 5. Watch line 1 of either file: `STATUS · T7 · phase · candidate/hash · open: R3,R5 · seen: peer T6 · evidence: … · next: …`. `DONE · <hashes>` means both accepted.
 
 ## How a code item flows
@@ -68,7 +68,7 @@ coder   : work/<item>-v1.patch + work/<item>-v1-tests.txt  (baseline SHA, RED on
 reviewer: own worktree from baseline → reproduce RED/GREEN → external review → callers → R1..R6 or ACCEPT <file> · <sha12>
 coder   : ✓/✗ per R# → v2  (or SUPERSEDE v1: reason)
 both    : ACCEPT on the same sha12 → next item
-end     : if TASK authorises it, push branch → draft PR → PR-side review resolved → DONE
+end     : if TASK requires and authorises PR review, push branch → draft PR → PR-side review resolved → DONE
 ```
 
 Rules that matter most, learned the hard way:
@@ -76,7 +76,7 @@ Rules that matter most, learned the hard way:
 - **One READY candidate, then stop.** Posting v2/v3 before the first review triples the reviewer's work.
 - **RED/GREEN proves the code changed, not that it's right.** The reviewer writes the expected value and a plausible wrong fix *before* reading the test. A test that passes the wrong fix is a defect.
 - **R# = defects only.** Wording goes out as `IDEA`, non-blocking.
-- **Say limitations once** (receipt or TASK), never per turn.
+- **Record limitations once** (receipt or TASK), and update them when changed; do not repeat unchanged limitations every turn.
 - **Equal authority.** The pen-holder has no tie-break; deadlock → both positions in `OWNER DECIDES`, you decide.
 
 ## Requirements
