@@ -1,93 +1,158 @@
-# cc-collab — Claude Code × ChatGPT/Codex, one deliverable
+# cc-collab
 
-A protocol skill. Two AI agents work in **one shared folder** on your disk, talk only through their own markdown files, and finish when both post `ACCEPT <file> · <sha12>` on the same bytes. You answer only lines marked `OWNER`. No copy-pasting between the two.
+### Let Claude and ChatGPT check each other's work.
 
-The skill text is [`skills/cc-collab/SKILL.md`](skills/cc-collab/SKILL.md) (v12.0). It was rewritten after a real run — a mobile crash fix reviewed by both agents — and every rule in it traces to a cost or defect observed there.
+Instead of relying on one AI's first answer, give two assistants the same task. One prepares the work, the other challenges it, and they improve it together until both approve the same finished version.
 
-## What it's good for
+**Use it for a proposal, a research summary, a business plan, a technical specification, or a code fix.** Both assistants have equal standing: being the writer does not make one right.
 
-Any task with a single deliverable the two agents can check: a code fix with tests, a plan, a spec, a review, a decision memo. One agent **codes/drafts**, the other **reviews**. For code, the reviewer applies the patch in its own worktree, reproduces RED/GREEN itself, runs the external reviewer you name (e.g. CodeRabbit), and checks every caller. For documents, the reviewer checks requirement coverage. Defects use `R#`; style suggestions use nonblocking `IDEA`.
+cc-collab is a free set of instructions, called a **skill**, that teaches the assistants how to work together. It is not a separate app and does not include AI accounts or subscriptions.
 
-## Install
+[Get started](#get-started) · [See examples](#what-can-you-use-it-for) · [Read the rules](skills/cc-collab/SKILL.md)
 
-**Claude Code** — as a personal skill:
+## Why use two assistants?
 
-```bash
-mkdir -p ~/.claude/skills/cc-collab && curl -fsSL https://raw.githubusercontent.com/ferasarafe/cc-collab/main/skills/cc-collab/SKILL.md -o ~/.claude/skills/cc-collab/SKILL.md
-```
+A second answer is useful. A second assistant that can inspect the first assistant's work, question its assumptions, and request corrections can be more useful.
 
-or as a plugin, inside Claude Code:
+cc-collab gives that exchange a structure:
+
+- **A second perspective.** The reviewer looks for missing requirements, weak reasoning, and mistakes.
+- **Less manual coordination.** The assistants exchange feedback through files, so you do not have to copy every response between chats.
+- **A clear finish.** Both approve the exact same version, rather than agreeing in general while looking at different drafts.
+- **Visible checks.** You can see what was reviewed, what was tested, and what still needs your decision.
+
+This is designed to improve the result, not guarantee that it is correct. Two assistants can share the same blind spot. It also uses two AI sessions, so it can cost more than asking one assistant. Time and cost savings have not been measured.
+
+## What can you use it for?
+
+| If you need… | The assistants can work together to… |
+|---|---|
+| A client proposal | Prepare the proposal, then check it against your brief, pricing, and commitments. |
+| A business plan or decision memo | Develop the recommendation, challenge its assumptions, and identify missing information. |
+| A research summary | Organize the findings and check whether the evidence supports the conclusions. |
+| A product specification | Describe the intended behavior and look for gaps or conflicting requirements. |
+| A code fix | Investigate the cause, make a focused change, and independently check the tests and affected code. |
+
+It is most useful when the work deserves a second review. A quick rewrite or simple question may not need two assistants.
+
+## How it works
+
+**Your brief → first draft → independent review → improvements → approval from both**
+
+1. **You describe the result you want.** Include the audience, useful source material, and anything the assistants must preserve or avoid.
+2. **The assistants agree how to work.** They check access, divide writing responsibilities, and ask any essential questions together.
+3. **They exchange drafts and feedback.** One writes; the other reviews. Neither can overrule the other just because of its role.
+4. **They improve and check the result.** Code gets code tests. Documents are checked against your requirements.
+5. **Both approve the same saved version.** You receive the result with any remaining limitations or actions clearly stated.
+
+You step in when a decision needs your judgment. If a required decision remains unresolved, the work is marked blocked, not finished. Sending, publishing, or merging work needs your permission.
+
+## What you need
+
+- **Two active AI sessions:** Claude Code and Codex, or another ChatGPT environment that can read and write the same local folder.
+- **One shared folder:** both assistants must be able to save files there and read each other's updates.
+- **Access to any tools your task needs:** for example, your code repository or a testing tool.
+
+**Uploading a file to an ordinary ChatGPT conversation is not enough.** This workflow needs continuing read/write access to the shared folder. Both assistants also need to stay active while waiting, or have a verified way to wake up and check for updates.
+
+The skill does not open the second session or provide those capabilities for you. If access or monitoring does not work, the assistants should stop and explain the problem.
+
+## Get started
+
+### 1. Install the skill for Claude Code
+
+Inside Claude Code, run:
 
 ```text
 /plugin marketplace add ferasarafe/cc-collab
 /plugin install cc-collab@ferasarafe
 ```
 
-**ChatGPT / Codex:** nothing to install. The second agent reads the rules from `TASK.md` (Claude writes them there, §1), so it works with ChatGPT given folder access, or with Codex CLI started in the same folder. If you use Codex skills, drop the same `SKILL.md` into `~/.codex/skills/cc-collab/`.
+Alternatively, install it as a personal skill from a Bash terminal:
 
-## Folder layout (one folder per task)
-
-```
-my-task/
-├─ TASK.md        Claude writes: deliverable, done-when, roles, capabilities, OWNER questions, rules
-├─ CLAUDE.md      Claude's turns      (line 1 = status line, then append-only ### Tn turns)
-├─ CHATGPT.md     ChatGPT/Codex turns (same shape)
-├─ DRAFT.md       working content (documents) — the pen-holder writes it
-├─ <final file>   the requested format, once
-└─ work/          <item>-vN.patch · <item>-vN-tests.txt · <who>-<item>-vN-review.txt
-   └─ scratch/    logs, checkouts, raw evidence — kept, linkable, never polled
+```bash
+mkdir -p ~/.claude/skills/cc-collab && curl -fsSL https://raw.githubusercontent.com/ferasarafe/cc-collab/main/skills/cc-collab/SKILL.md -o ~/.claude/skills/cc-collab/SKILL.md
 ```
 
-Each agent writes **only its own file(s)**. Patch names are immutable (`v1`, `v2`, …). Nothing else goes in the folder.
+Codex does not need a separate installation to join: Claude puts the task's rules in the shared folder. To make the skill available directly in Codex too, save [SKILL.md](skills/cc-collab/SKILL.md) as `~/.codex/skills/cc-collab/SKILL.md`.
 
-## Launch
+### 2. Give Claude your brief
 
-1. Make the folder. Put source material next to it (or anywhere; TASK cites it by path).
-2. **Claude Code** — open a session with the folder as working directory and paste:
+Create a folder for the task, open Claude Code with access to it, and replace the brackets below:
 
-   ```text
-   Invoke the cc-collab skill. cc-collab in this folder. <one line: the deliverable and its final format>.
-   You are <Lead|reviewer>; ChatGPT <codes|drafts> in CHATGPT.md and work/. Turn 1: verify <Sentry, CodeRabbit, git, …> and write access (else SETUP BLOCKED), record the baseline SHA, ask me the OWNER questions in one batch, and start your independent re-investigation. Write only CLAUDE.md, TASK.md, DRAFT.md, work/claude-* receipts, your authorized scratch worktree/evidence under work/scratch/, and the final output if TASK designates you as its writer. Stay in-turn and poll CHATGPT.md every 60 s; no turn limit; continue until both accept the same hashes.
-   ```
+```text
+Use the cc-collab skill in [full folder path].
 
-   Claude writes `TASK.md`, posts `CLAUDE.md` T1 and prints the **startup line** for the other agent.
+I want [the finished result and file format].
+It is for [audience].
+Use these sources: [files or links].
+It must include [requirements] and avoid [constraints].
 
-3. **ChatGPT (with folder access) or Codex** — new conversation in the same folder, paste the startup line Claude printed. It looks like:
-
-   ```text
-   cc-collab in <FOLDER>. Read TASK.md fully. You are an equal collaborator; <writing/research scope>. Verify required capabilities. Write only CHATGPT.md and authorized work/ files. T1: MONITOR (verified). First peer check after two minutes; thereafter every minute while active.
-   ```
-
-4. Answer any `OWNER Qn` lines in whichever chat you're in. Optional questions carry a default and a trigger within existing authorization. Required decisions can block the run; silence never grants a permission (push, publish, send, spend).
-5. Watch line 1 of either file: `STATUS · T7 · phase · candidate/hash · open: R3,R5 · seen: peer T6 · evidence: … · next: …`. `DONE · <hashes>` means both accepted.
-
-## How a code item flows
-
-```
-coder   : work/<item>-v1.patch + work/<item>-v1-tests.txt  (baseline SHA, RED on old, GREEN on new) → STOP
-reviewer: own worktree from baseline → reproduce RED/GREEN → external review → callers → R1..R6 or ACCEPT <file> · <sha12>
-coder   : ✓/✗ per R# → v2  (or SUPERSEDE v1: reason)
-both    : ACCEPT on the same sha12 → next item
-end     : if TASK requires and authorises PR review, push branch → draft PR → PR-side review resolved → DONE
+You and ChatGPT are equal collaborators. Set up the shared task,
+check the access you need, and give me the startup message for
+ChatGPT or Codex. Ask any essential questions in one batch.
 ```
 
-Rules that matter most, learned the hard way:
+For example: “I want a one-page proposal in Word for a restaurant owner, based on these meeting notes. It must preserve the agreed price and must not invent additional services.”
 
-- **One READY candidate, then stop.** Posting v2/v3 before the first review triples the reviewer's work.
-- **RED/GREEN proves the code changed, not that it's right.** The reviewer writes the expected value and a plausible wrong fix *before* reading the test. A test that passes the wrong fix is a defect.
-- **R# = defects only.** Wording goes out as `IDEA`, non-blocking.
-- **Record limitations once** (receipt or TASK), and update them when changed; do not repeat unchanged limitations every turn.
-- **Equal authority.** The pen-holder has no tie-break; deadlock → both positions in `OWNER DECIDES`, you decide.
+### 3. Start the second assistant
 
-## Requirements
+Open Codex, or a compatible ChatGPT environment, with access to the **same folder**. Paste the startup message Claude gives you.
 
-- Both agents must read and write the same folder without you relaying (Claude Code working dir; ChatGPT with folder/file access, or Codex CLI). If either can't, the run stops at `SETUP BLOCKED`.
-- Both stay alive by in-turn polling (≤ 60 s). An agent whose turn ends without a confirmed wake-up has left the run.
-- Name the external tools in TASK (git/GitHub, CodeRabbit, Sentry, …); both verify them in turn 1.
+This is the one-time handoff. After that, the assistants exchange their work through the folder; you do not need to relay their reviews.
 
-## Files here
+### 4. Follow the progress
 
-- `skills/cc-collab/SKILL.md` — the skill (frontmatter + protocol, ~780 words).
-- `.claude-plugin/` — manifest so Claude Code can install it as a plugin.
+Read either assistant's latest status or the first line of its conversation file. Answer questions marked `OWNER` or `OWNER DECIDES` when needed.
 
-License: MIT.
+When both approve the same result, they mark it `DONE` and tell you what is ready. Review any stated limitations before using or publishing it.
+
+## What the labels mean
+
+| Label you may see | Plain meaning |
+|---|---|
+| `READY` | This version is ready for the other assistant to review. |
+| `R1`, `R2`, … | A numbered problem or unmet requirement to resolve. |
+| `IDEA` | An optional suggestion, not a required correction. |
+| `SUPERSEDE` | A newer version replaces the previous review version. |
+| `ACCEPT` | The assistant approves this exact saved version. |
+| `sha12` | A short file fingerprint used to check that both approved the same version. |
+| `OWNER DECIDES` | A question that needs your judgment. |
+| `SETUP BLOCKED` | Required access or a working way to monitor updates is missing. |
+| `DONE` | Both approved the required outputs and the required checks are resolved. |
+
+## Where the work is saved
+
+| File or folder | What it contains |
+|---|---|
+| `TASK.md` | Your brief, responsibilities, permissions, and definition of finished. |
+| `CLAUDE.md` | Claude's status and review messages. |
+| `CHATGPT.md` | ChatGPT/Codex's status and review messages. |
+| `DRAFT.md` | The working draft, where applicable. |
+| Your final file | The requested result, such as a document or specification. |
+| `work/` | Code changes and records of what was checked, when needed. |
+| `work/scratch/` | Supporting evidence and temporary working material. |
+
+Each assistant writes only its assigned files. They keep supporting evidence available without rereading the whole folder on every check.
+
+## For developers: how code review works
+
+The assistants investigate independently and agree on the cause and smallest fix before coding. The reviewer determines the expected behavior before relying on the writer's test assertions.
+
+For each code change:
+
+1. The writer supplies one versioned patch and a test record: baseline commit, file fingerprint, commands, results, and verification limits.
+2. A regression test fails on the old code (**RED**) and passes after the fix (**GREEN**).
+3. The reviewer applies the patch independently, reproduces the checks, inspects affected callers, and runs any external review required by the task.
+4. The writer answers every finding. Replacements get new version names; old handoffs are not overwritten.
+5. Both approve the same version. Branch publication and pull-request review happen only when the task **requires and authorizes** them.
+
+Passing tests or a clean automated review is evidence, not proof of correctness. Document tasks use requirement checks rather than artificial RED/GREEN tests.
+
+## About this version
+
+The current skill is **v12.0**. It was refined through a real Claude–ChatGPT collaboration, including a code review where both assistants initially missed a defect. The rules emphasize independent reasoning, clear evidence, equal authority, and less repeated review work.
+
+The complete instructions are in [SKILL.md](skills/cc-collab/SKILL.md). The `.claude-plugin/` folder contains the files Claude Code uses to install the plugin.
+
+License: [MIT](LICENSE).
