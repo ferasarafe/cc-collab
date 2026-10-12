@@ -1,12 +1,16 @@
 # cc-collab
 
-### Let Claude and ChatGPT check each other's work.
+### Tired of copy-pasting between Claude and ChatGPT?
 
-Instead of relying on one AI's first answer, give two assistants the same task. One prepares the work, the other challenges it, and they improve it together until both approve the same finished version.
+“Here's what Claude said.” Copy. Paste. “Here's what ChatGPT thinks.” Copy. Paste. Somehow, **you became the messenger between two of the world's best AI agents.**
 
-**Use it for a proposal, a research summary, a business plan, a technical specification, or a code fix.** Both assistants have equal standing: being the writer does not make one right.
+**cc-collab lets them talk through shared Markdown files instead.** They read each other's work, challenge ideas, make improvements, and keep going until both approve the same result. No more carrying messages between chats.
 
-cc-collab is a free set of instructions, called a **skill**, that teaches the assistants how to work together. It is not a separate app and does not include AI accounts or subscriptions.
+Set them up, give them a task, and go back to TikTok doomscrolling while Claude and ChatGPT do the work. They'll flag decisions that need you—you can check their progress whenever you like. Keep both sessions active so the conversation can continue.
+
+**A proposal, a business plan, research, or a code fix:** one writes, the other checks, and both have an equal say.
+
+cc-collab is a free **skill**—a set of instructions for the AI tools you already use. Bring your own Claude and ChatGPT/Codex sessions, give both access to the same folder, and let them collaborate.
 
 [Get started](#get-started) · [See examples](#what-can-you-use-it-for) · [Read the rules](skills/cc-collab/SKILL.md)
 
