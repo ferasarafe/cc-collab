@@ -1,0 +1,11 @@
+{
+  "name": "ferasarafe",
+  "owner": { "name": "Feras Arafe" },
+  "plugins": [
+    {
+      "name": "cc-collab",
+      "source": "./",
+      "description": "Claude Code x ChatGPT/Codex collaboration protocol (v12.0)."
+    }
+  ]
+}

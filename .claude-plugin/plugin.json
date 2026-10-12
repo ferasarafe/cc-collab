@@ -1,0 +1,7 @@
+{
+  "name": "cc-collab",
+  "version": "12.0.0",
+  "description": "Claude Code x ChatGPT/Codex collaboration protocol: two agents converge on one deliverable through shared files, with hashed ACCEPTs, independent RED/GREEN reproduction and expected-value-first review.",
+  "author": { "name": "Feras Arafe" },
+  "skills": ["./skills/cc-collab"]
+}
